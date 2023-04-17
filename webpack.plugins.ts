@@ -8,7 +8,7 @@ export const plugins = [
     logger: 'webpack-infrastructure',
   }),
   new webpack.DefinePlugin({
-    'process.env.FLUENTFFMPEG_COV': ''
+    'process.env.FLUENTFFMPEG_COV': false
   })
 
 ];
