@@ -1,0 +1,56 @@
+{
+  "name": "wweb-electron-ts-tailwindcss",
+  "productName": "wweb-electron-ts-tailwindcss",
+  "version": "1.0.0",
+  "description": "My Electron application description",
+  "main": ".webpack/main",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "eslint --ext .ts,.tsx ."
+  },
+  "keywords": [],
+  "author": {
+    "name": "Bruno Santos",
+    "email": "brsantos197@gmail.com"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@electron-forge/cli": "^6.1.1",
+    "@electron-forge/maker-deb": "^6.1.1",
+    "@electron-forge/maker-rpm": "^6.1.1",
+    "@electron-forge/maker-squirrel": "^6.1.1",
+    "@electron-forge/maker-zip": "^6.1.1",
+    "@electron-forge/plugin-webpack": "^6.1.1",
+    "@types/react": "^18.0.35",
+    "@types/react-dom": "^18.0.11",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "@vercel/webpack-asset-relocator-loader": "1.7.3",
+    "autoprefixer": "^10.4.14",
+    "css-loader": "^6.0.0",
+    "electron": "^24.1.2",
+    "eslint": "^8.0.1",
+    "eslint-plugin-import": "^2.25.0",
+    "fork-ts-checker-webpack-plugin": "^7.2.13",
+    "node-loader": "^2.0.0",
+    "postcss": "^8.4.22",
+    "postcss-loader": "^7.2.4",
+    "style-loader": "^3.0.0",
+    "tailwindcss": "^3.3.1",
+    "ts-loader": "^9.2.2",
+    "ts-node": "^10.0.0",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
+    "puppeteer-core": "^19.9.0",
+    "puppeteer-in-electron": "^3.0.5",
+    "qrcode.react": "^3.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "wwebjs-electron": "^1.1.3"
+  }
+}
