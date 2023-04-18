@@ -45,9 +45,9 @@ pie.initialize(app)
           nodeIntegration: true,
         }
       })
-      
+
       window.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-      
+
       mainWindow.on('close', () => {
         window.close()
       })
@@ -64,7 +64,7 @@ pie.initialize(app)
       let wwebWindow: BrowserWindow
       try {
         mainWindow = await createMainWindow()
-        
+
         const { browser, window } = await createWWebWindow(mainWindow)
         wwebWindow = window
 
@@ -124,19 +124,21 @@ pie.initialize(app)
       if (!gotTheLock) {
         app.quit()
       } else {
-        app.on('second-instance', (event, commandLine) => {
-          // Someone tried to run a second instance, we should focus our window.
-          const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
+        if (process.platform === 'win32') {
+          app.on('second-instance', (event, commandLine) => {
+            // Someone tried to run a second instance, we should focus our window.
+            const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
 
-          if (mainWindow) {
+            if (mainWindow) {
 
-            if (mainWindow.isMinimized()) mainWindow.restore()
-            whatsappClient.sendMessage(`${contact}@c.us`, message)
-            mainWindow.focus()
-          }
-          // the commandLine is array of strings in which last element is deep link url
-          // the url str ends with /
-        })
+              if (mainWindow.isMinimized()) mainWindow.restore()
+              whatsappClient.sendMessage(`${contact}@c.us`, message)
+              mainWindow.focus()
+            }
+            // the commandLine is array of strings in which last element is deep link url
+            // the url str ends with /
+          })
+        }
       }
 
     }
