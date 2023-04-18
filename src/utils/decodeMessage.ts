@@ -2,7 +2,7 @@ export const decodeMessage = (dataUrl: string): {
   contact: string;
   message: string;
 } => {
-  const data = decodeURI(dataUrl.replace('wmstatus://', ''))
+  const data = decodeURIComponent(dataUrl.replace('wmstatus://', ''))
   const contact = data.slice(data.indexOf('contact='), data.indexOf('&message=')).replace('contact=', '')
   let message = data.slice(data.indexOf('message=')).replace('message=', '')
 
