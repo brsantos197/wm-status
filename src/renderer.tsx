@@ -48,3 +48,11 @@ window.WhatsApp.onqrcode((event, qrcode: string) => {
   console.log(qrcode);
   root.render(<App qrcode={qrcode} ready={false} />)
 })
+
+window.WhatsApp.ondisconnected((event, value) => {
+  console.log('Disconectado');
+})
+
+window.WhatsApp.onconnected((event, value) => {
+  console.log('Conectado');
+})

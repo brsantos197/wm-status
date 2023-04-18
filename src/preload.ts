@@ -3,13 +3,12 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
 export const WhatsAppApi = {
-  onqrcode: (callback: (event: any, qrcode: string) => void) => ipcRenderer.on('qrcode', callback),
-  connected: (callback: (event: any, qrcode: string) => void) => ipcRenderer.on('connected', callback),
+  onqrcode: (callback: (event: any, qrcode: string) => void) => ipcRenderer.on('onqrcode', callback),
+  onconnected: (callback: (event: any, value: boolean) => void) => ipcRenderer.on('onconnected', callback),
+  ondisconnected: (callback: (event: any, value: boolean) => void) => ipcRenderer.on('ondisconnected', callback),
 }
 
 contextBridge.exposeInMainWorld('WhatsApp', WhatsAppApi)
-
-console.log('asdasd');
 
 ipcRenderer.on('log', (event, value) => {
   console.log(value, 'aqui');
