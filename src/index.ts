@@ -68,16 +68,12 @@ pie.initialize(app)
         const { browser, window } = await createWWebWindow(mainWindow)
         wwebWindow = window
 
-        console.log('caiu aqui');
-
         const gotTheLock = app.requestSingleInstanceLock()
 
         if (!gotTheLock) {
           app.quit()
         } else {
           app.on('second-instance', (event, commandLine) => {
-            console.log('caiu aqui w');
-
             // Someone tried to run a second instance, we should focus our window.
             const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
 
@@ -133,19 +129,16 @@ pie.initialize(app)
         // Setting this is required to get this working in dev mode.
         app.setAsDefaultProtocolClient('wmstatus-devasdas', process.execPath, [resolve(process.argv[1]), 'teste']);
       } else {
+        if (process.platform === 'darwin') {
+          app.on('open-url', function (event, url) {
+            const { contact, message } = decodeMessage(url)
+            console.log(contact, message);
+  
+            whatsappClient.sendMessage(`${contact}@c.us`, message)
+          });
+        }
         app.setAsDefaultProtocolClient('wmstatus');
       }
-
-      if (process.platform === 'darwin') {
-        // app.on('open-url', function (event, url) {
-        //   const { contact, message } = decodeMessage(url)
-        //   console.log(contact, message);
-
-        //   whatsappClient.sendMessage(`${contact}@c.us`, message)
-        // });
-      }
-
-
 
     }
     app.on('ready', main);
