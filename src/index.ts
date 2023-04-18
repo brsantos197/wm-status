@@ -21,7 +21,7 @@ let whatsappClient: Client
 
 pie.initialize(app)
   .then(() => {
-    const createMainWindow = (): BrowserWindow => {
+    const createMainWindow = async (): Promise<BrowserWindow> => {
       // Create the browser window.
       const mainWindow = new BrowserWindow({
         height: 600,
@@ -78,50 +78,47 @@ pie.initialize(app)
         mainWindow.webContents.send('log', error)
         dialog.showErrorBox('Client Initialize', error)
       }
-
     }
 
     const main = async () => {
-      const mainWindow = createMainWindow()
-      await createWWebWindow(mainWindow)
-      dialog.showErrorBox('Opa', 'caiu aqui')
+      const mainWindow = await createMainWindow()
+      createWWebWindow(mainWindow)
 
-      // if (isDev && process.platform === 'win32') {
-      //   // Set the path of electron.exe and your app.
-      //   // These two additional parameters are only available on windows.
-      //   // Setting this is required to get this working in dev mode.
-      //   app.setAsDefaultProtocolClient('wmstatus-dev', process.execPath, [resolve(process.argv[1])]);
-      // } else {
-      //   app.setAsDefaultProtocolClient('wmstatus');
-      // }
+      if (isDev && process.platform === 'win32') {
+        // Set the path of electron.exe and your app.
+        // These two additional parameters are only available on windows.
+        // Setting this is required to get this working in dev mode.
+        // app.setAsDefaultProtocolClient('wmstatus-devasdas', process.execPath, [resolve(process.argv[1]), 'teste']);
+      } else {
+        app.setAsDefaultProtocolClient('wmstatus');
+      }
 
-      // app.on('open-url', function (event, url) {
-      //   event.preventDefault()
-      //   const { contact, message } = decodeMessage(url)
-      //   console.log(contact, message);
+      app.on('open-url', function (event, url) {
+        const { contact, message } = decodeMessage(url)
+        console.log(contact, message);
 
-      //   whatsappClient.sendMessage(`${contact}@c.us`, message)
-      // });
+        whatsappClient.sendMessage(`${contact}@c.us`, message)
+      });
 
-      // const gotTheLock = app.requestSingleInstanceLock()
+      const gotTheLock = app.requestSingleInstanceLock()
 
-      // if (!gotTheLock) {
-      //   app.quit()
-      // } else {
-      //   app.on('second-instance', (event, commandLine, workingDirectory) => {
-      //     // Someone tried to run a second instance, we should focus our window.
-      //     const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
+      if (!gotTheLock) {
+        app.quit()
+      } else {
+        app.on('second-instance', (event, commandLine, workingDirectory) => {
+          // Someone tried to run a second instance, we should focus our window.
+          const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
 
-      //     if (mainWindow) {
+          if (mainWindow) {
 
-      //       if (mainWindow.isMinimized()) mainWindow.restore()
-      //       whatsappClient.sendMessage(`${contact}@c.us`, message)
-      //       mainWindow.focus()
-      //     }
-      //     // the commandLine is array of strings in which last element is deep link url
-      //     // the url str ends with /
-      //   })
-      // }
+            if (mainWindow.isMinimized()) mainWindow.restore()
+            whatsappClient.sendMessage(`${contact}@c.us`, message)
+            mainWindow.focus()
+          }
+          // the commandLine is array of strings in which last element is deep link url
+          // the url str ends with /
+        })
+      }
 
     }
     app.on('ready', main);

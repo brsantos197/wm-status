@@ -7,7 +7,7 @@ export const decodeMessage = (dataUrl: string): {
   let message = data.slice(data.indexOf('message=')).replace('message=', '')
 
   if (message[message.length - 1] === '/') {
-    message = message.slice(message.length - 1)
+    message = message.substring(-1, message.length - 1)
   }
 
   return { contact, message }
