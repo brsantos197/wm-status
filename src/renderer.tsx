@@ -26,17 +26,15 @@
  * ```
  */
 
-import React from 'react';
-import { App } from './components/App';
+import React, { useEffect, useState } from 'react';
 import './index.css';
 import { WhatsAppApi } from './preload';
 
 import { createRoot } from 'react-dom/client';
+import { WhatsApp } from './components/WhatsApp';
 
 const domNode = document.getElementById('root');
 export const root = createRoot(domNode);
-
-root.render(<App qrcode='' ready={false} />)
 
 interface ElectronWindow extends Window {
   WhatsApp: typeof WhatsAppApi
@@ -44,15 +42,43 @@ interface ElectronWindow extends Window {
 
 declare const window: ElectronWindow
 
-window.WhatsApp.onqrcode((event, qrcode: string) => {
-  console.log(qrcode);
-  root.render(<App qrcode={qrcode} ready={false} />)
-})
+const App = () => {
+  const [qrcode, setQrcode] = useState('')
+  const [ready, setReady] = useState(false)
+  const [disconnected, setDisconnected] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-window.WhatsApp.ondisconnected((event, value) => {
-  console.log('Disconectado');
-})
+  useEffect(() => {
+    window.WhatsApp.onqrcode((event, qr: string) => {
+      setLoading(false)
+      setQrcode(qr)
+    })
+    
+    window.WhatsApp.ondisconnected(() => {
+      setReady(false)
+      setDisconnected(true)
+      console.log('Disconectado');
+    })
+    
+    window.WhatsApp.onconnected(() => {
+      setReady(true)
+      setLoading(false)
+      console.log('Conectado');
+    })
 
-window.WhatsApp.onconnected((event, value) => {
-  console.log('Conectado');
-})
+    window.WhatsApp.onloading(() => {
+      setLoading(true)
+      console.log('Carregando');
+    })
+  }, [])
+
+  return (
+    <>
+      <WhatsApp qrcode={qrcode} ready={ready} loading={loading} disconnected={disconnected} />
+    </>
+  );
+}
+
+root.render(<App />)
+
+
