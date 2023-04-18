@@ -1,8 +1,8 @@
 {
-  "name": "wweb-electron-ts-tailwindcss",
-  "productName": "wweb-electron-ts-tailwindcss",
+  "name": "wm-status",
+  "productName": "wm-status",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "App para envio de mensagem de status",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
