@@ -42,14 +42,15 @@ pie.initialize(app)
       const window = new BrowserWindow({
         show: false,
       })
-
       window.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-      window.on('ready-to-show', () => {
-        setTimeout(() => {
-          window.webContents.reloadIgnoringCache()
-          window.removeAllListeners('ready-to-show')
-        }, 1000);
+      mainWindow.on('ready-to-show', () => {
+        window.on('ready-to-show', () => {
+          setTimeout(() => {
+            window.webContents.reloadIgnoringCache()
+            window.removeAllListeners('ready-to-show')
+          }, 100);
+        })
       })
       mainWindow.on('close', () => {
         window.close()
@@ -58,7 +59,6 @@ pie.initialize(app)
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const browser = await pie.connect(app, puppeteer);
-      window.webContents.reloadIgnoringCache()
       return { browser, window }
     }
 
@@ -119,7 +119,7 @@ pie.initialize(app)
 
         await whatsappClient.initialize();
       } catch (error) {
-        mainWindow.webContents.send('log', error)
+        mainWindow.webContents.send('error', error)
         dialog.showErrorBox('Client Initialize', error)
         console.error(error);
         throw error
