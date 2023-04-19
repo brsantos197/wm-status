@@ -44,14 +44,6 @@ pie.initialize(app)
       })
       window.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-      mainWindow.on('ready-to-show', () => {
-        window.on('ready-to-show', () => {
-          setTimeout(() => {
-            window.webContents.reloadIgnoringCache()
-            window.removeAllListeners('ready-to-show')
-          }, 100);
-        })
-      })
       mainWindow.on('close', () => {
         window.close()
       })
@@ -94,6 +86,15 @@ pie.initialize(app)
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         whatsappClient = new Client(browser, wwebWindow);
+
+        mainWindow.on('ready-to-show', () => {
+          console.log('MAIN WINDOW READY');
+          setTimeout(() => {
+            window.webContents.reloadIgnoringCache()
+            window.removeAllListeners('ready-to-show')
+          }, 1000);
+        })
+
         whatsappClient.on('qr', (qr: string) => {
           mainWindow.webContents.send('onqrcode', qr)
         });
@@ -135,7 +136,7 @@ pie.initialize(app)
           app.on('open-url', function (event, url) {
             const { contact, message } = decodeMessage(url)
             console.log(contact, message);
-  
+
             whatsappClient.sendMessage(`${contact}@c.us`, message)
           });
         }
