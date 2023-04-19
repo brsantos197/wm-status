@@ -40,17 +40,17 @@ pie.initialize(app)
     };
     const createWWebWindow = async (mainWindow: BrowserWindow): Promise<{ browser: Browser, window: BrowserWindow }> => {
       const window = new BrowserWindow({
-        show: false,
+        width: 0,
+        height: 0
       })
       window.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-      mainWindow.on('ready-to-show', () => {
-        window.on('ready-to-show', () => {
-          setTimeout(() => {
-            window.webContents.reloadIgnoringCache()
-            window.removeAllListeners('ready-to-show')
-          }, 100);
-        })
+      window.on('ready-to-show', () => {
+        setTimeout(() => {
+          window.webContents.reloadIgnoringCache()
+          window.hide()
+          window.removeAllListeners('ready-to-show')
+        }, 1000);
       })
       mainWindow.on('close', () => {
         window.close()
@@ -84,7 +84,6 @@ pie.initialize(app)
 
               if (mainWindow.isMinimized()) mainWindow.restore()
               whatsappClient.sendMessage(`${contact}@c.us`, message)
-              // mainWindow.focus()
             }
             // the commandLine is array of strings in which last element is deep link url
             // the url str ends with /
@@ -135,7 +134,6 @@ pie.initialize(app)
           app.on('open-url', function (event, url) {
             const { contact, message } = decodeMessage(url)
             console.log(contact, message);
-  
             whatsappClient.sendMessage(`${contact}@c.us`, message)
           });
         }

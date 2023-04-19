@@ -23,7 +23,7 @@ export const WhatsApp = ({ qrcode, ready, loading, disconnected }: WhatsAppProps
             ) :
               null
             }
-            {(qrcode && !loading) ? (
+            {qrcode && !loading ? (
               <>
                 {
                   !disconnected ? (
