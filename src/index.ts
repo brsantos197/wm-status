@@ -124,7 +124,6 @@ pie.initialize(app)
         await whatsappClient.initialize();
       } catch (error) {
         mainWindow.webContents.send('error', error)
-        app.relaunch()
         console.error(error);
         throw error
       }
