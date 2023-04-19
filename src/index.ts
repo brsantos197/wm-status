@@ -98,6 +98,7 @@ pie.initialize(app)
         })
 
         whatsappClient.on('qr', (qr: string) => {
+          mainWindow.webContents.send('onloading', true)
           mainWindow.webContents.send('onqrcode', qr)
         });
 
@@ -123,7 +124,7 @@ pie.initialize(app)
         await whatsappClient.initialize();
       } catch (error) {
         mainWindow.webContents.send('error', error)
-        dialog.showErrorBox('Client Initialize', error)
+        app.relaunch()
         console.error(error);
         throw error
       }
