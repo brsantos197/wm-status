@@ -45,15 +45,6 @@ pie.initialize(app)
       })
       window.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-      mainWindow.on('ready-to-show', () => {
-        window.on('ready-to-show', () => {
-          setTimeout(() => {
-            window.webContents.reloadIgnoringCache()
-            window.hide()
-            window.removeAllListeners('ready-to-show')
-          }, 1000);
-        })
-      })
       mainWindow.on('close', () => {
         window.close()
       })
@@ -97,11 +88,13 @@ pie.initialize(app)
         whatsappClient = new Client(browser, wwebWindow);
 
         mainWindow.on('ready-to-show', () => {
-          console.log('MAIN WINDOW READY');
-          setTimeout(() => {
-            window.webContents.reloadIgnoringCache()
-            window.removeAllListeners('ready-to-show')
-          }, 1000);
+          window.on('ready-to-show', () => {
+            setTimeout(() => {
+              window.webContents.reloadIgnoringCache()
+              window.hide()
+              window.removeAllListeners('ready-to-show')
+            }, 1000);
+          })
         })
 
         whatsappClient.on('qr', (qr: string) => {
