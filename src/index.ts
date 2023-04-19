@@ -41,13 +41,16 @@ pie.initialize(app)
     const createWWebWindow = async (mainWindow: BrowserWindow): Promise<{ browser: Browser, window: BrowserWindow }> => {
       const window = new BrowserWindow({
         show: false,
-        webPreferences: {
-          nodeIntegration: true,
-        }
       })
 
       window.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
+      window.on('ready-to-show', () => {
+        setTimeout(() => {
+          window.webContents.reloadIgnoringCache()
+          window.removeAllListeners('ready-to-show')
+        }, 1000);
+      })
       mainWindow.on('close', () => {
         window.close()
       })
@@ -88,9 +91,6 @@ pie.initialize(app)
           })
         }
 
-        setTimeout(() => {
-          wwebWindow.webContents.reloadIgnoringCache()
-        }, 2000);
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         whatsappClient = new Client(browser, wwebWindow);
@@ -121,13 +121,15 @@ pie.initialize(app)
       } catch (error) {
         mainWindow.webContents.send('log', error)
         dialog.showErrorBox('Client Initialize', error)
+        console.error(error);
+        throw error
       }
 
       if (isDev && process.platform === 'win32') {
         // Set the path of electron.exe and your app.
         // These two additional parameters are only available on windows.
         // Setting this is required to get this working in dev mode.
-        app.setAsDefaultProtocolClient('wmstatus-devasdas', process.execPath, [resolve(process.argv[1]), 'teste']);
+        app.setAsDefaultProtocolClient('wmstatus-dev', process.execPath, [resolve(process.argv[1]), 'teste']);
       } else {
         if (process.platform === 'darwin') {
           app.on('open-url', function (event, url) {
