@@ -93,6 +93,15 @@ pie.initialize(app)
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         whatsappClient = new Client(browser, wwebWindow);
+
+        mainWindow.on('ready-to-show', () => {
+          console.log('MAIN WINDOW READY');
+          setTimeout(() => {
+            window.webContents.reloadIgnoringCache()
+            window.removeAllListeners('ready-to-show')
+          }, 1000);
+        })
+
         whatsappClient.on('qr', (qr: string) => {
           mainWindow.webContents.send('onqrcode', qr)
         });
