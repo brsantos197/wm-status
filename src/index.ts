@@ -1,4 +1,4 @@
-import { app, BrowserWindow, globalShortcut, Menu, Notification } from 'electron';
+import { app, BrowserWindow, globalShortcut, Notification } from 'electron';
 import { Client } from 'wwebjs-electron';
 import pie from "puppeteer-in-electron";
 import isDev from 'electron-is-dev'
@@ -94,6 +94,12 @@ pie.initialize(app)
           whatsappClient.on('ready', () => {
             needRefresh = false
             console.log('Client is ready!');
+            if (!mainWindow.isFocused()) {
+              new Notification({
+                title: 'WM Status',
+                body: 'WhatsApp conectado!'
+              }).show()
+            }
             mainWindow.webContents.send('onconnected', true)
 
           });
@@ -134,13 +140,6 @@ pie.initialize(app)
       globalShortcut.register('F12', () => {
         mainWindow.webContents.toggleDevTools()
       })
-
-      console.log(Notification.isSupported());
-
-      new Notification({
-        title: 'WM Status',
-        body: 'WhatsApp conectado!'
-      }).show()
 
       if (isDev && process.platform === 'win32') {
         // Set the path of electron.exe and your app.
