@@ -120,7 +120,7 @@ pie.initialize(app)
             if (needRefresh) {
               wwebWindow.webContents.reloadIgnoringCache()
             }
-          }, 20000);
+          }, 30 * 1000);
 
           try {
             await whatsappClient.initialize();
