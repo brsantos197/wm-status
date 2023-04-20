@@ -17,7 +17,8 @@ if (require('electron-squirrel-startup')) {
 }
 
 let whatsappClient: Client
-const iconPath = resolve(__dirname, 'icon.png')
+const appIconPath = resolve(__dirname, 'app_icon.png')
+const closeIconPath = resolve(__dirname, 'close_icon.png')
 pie.initialize(app)
   .then(() => {
     const createMainWindow = async (): Promise<BrowserWindow> => {
@@ -60,23 +61,23 @@ pie.initialize(app)
           wwebWindow = window
 
           if (process.platform === 'win32') {
-            const tray = new Tray(iconPath)
+            const tray = new Tray(appIconPath)
             tray.on('click', () => {
               mainWindow.show()
             })
             const contextMenu = Menu.buildFromTemplate([
               {
-                label: 'sair', click: () => {
+                label: 'Sair', click: () => {
                   mainWindow.removeAllListeners()
                   app.quit()
                 }
               }
             ])
-            tray.setToolTip('wm status')
+            tray.setToolTip('WM Status App')
             const ballon = {
-              title: 'wm status',
-              content: 'rodando em segundo plano',
-              icon: iconPath
+              title: 'Segundo Plano',
+              content: 'Rodando em segundo plano',
+              icon: closeIconPath
             }
             tray.setContextMenu(contextMenu)
             mainWindow.on('close', (e) => {

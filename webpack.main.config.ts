@@ -17,7 +17,7 @@ export const mainConfig: Configuration = {
    * This is the main entry point for your application, it's the first file
    * that runs in the main process.
    */
-  entry: ['./src/index.ts', './src/icon.png'],
+  entry: ['./src/index.ts', './src/app_icon.png', './src/close_icon.png'],
   // Put your normal webpack config below here
   module: {
     rules,
