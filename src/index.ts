@@ -17,7 +17,7 @@ if (require('electron-squirrel-startup')) {
 }
 
 let whatsappClient: Client
-
+const iconPath = resolve(__dirname, 'icon.png')
 pie.initialize(app)
   .then(() => {
     const createMainWindow = async (): Promise<BrowserWindow> => {
@@ -60,21 +60,35 @@ pie.initialize(app)
           wwebWindow = window
 
           if (process.platform === 'win32') {
-            console.log(resolve(__dirname, 'icon.png'));
-
-            const tray = new Tray(resolve(__dirname, 'icon.png'))
+            const tray = new Tray(iconPath)
             tray.on('click', () => {
-              mainWindow.close()
-              window.close()
+              mainWindow.show()
             })
             const contextMenu = Menu.buildFromTemplate([
-              { label: 'Desconectar'}
+              {
+                label: 'sair', click: () => {
+                  mainWindow.removeAllListeners()
+                  app.quit()
+                }
+              }
             ])
-            tray.setToolTip('This is my application.')
+            tray.setToolTip('wm status')
+            const ballon = {
+              title: 'wm status',
+              content: 'rodando em segundo plano',
+              icon: iconPath
+            }
             tray.setContextMenu(contextMenu)
             mainWindow.on('close', (e) => {
               e.preventDefault()
               mainWindow.hide()
+            })
+            mainWindow.on('minimize', (e: Electron.Event) => {
+              e.preventDefault()
+              mainWindow.hide()
+            })
+            mainWindow.once('hide', () => {
+              tray.displayBalloon(ballon)
             })
           }
 
@@ -134,13 +148,15 @@ pie.initialize(app)
             mainWindow.webContents.send('error', message)
           })
 
+          let counter = 15
           const interval = setInterval(() => {
             if (needRefresh) {
               wwebWindow.webContents.reloadIgnoringCache()
+              counter += 5
             } else {
               clearInterval(interval)
             }
-          }, 30 * 1000);
+          }, counter * 1000);
 
           try {
             await whatsappClient.initialize();
