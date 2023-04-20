@@ -67,7 +67,7 @@ pie.initialize(app)
             })
             const contextMenu = Menu.buildFromTemplate([
               {
-                label: 'Sair', click: () => {
+                label: 'Sair', icon: closeIconPath, click: () => {
                   mainWindow.removeAllListeners()
                   app.quit()
                 }
@@ -77,7 +77,7 @@ pie.initialize(app)
             const ballon = {
               title: 'Segundo Plano',
               content: 'Rodando em segundo plano',
-              icon: closeIconPath
+              icon: appIconPath
             }
             tray.setContextMenu(contextMenu)
             mainWindow.on('close', (e) => {
