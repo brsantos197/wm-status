@@ -91,6 +91,10 @@ pie.initialize(app)
             mainWindow.once('hide', () => {
               tray.displayBalloon(ballon)
             })
+          } else {
+            mainWindow.on('close', () => {
+              wwebWindow.close()
+            })
           }
 
           const gotTheLock = app.requestSingleInstanceLock()
