@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, globalShortcut, Menu, Notification } from 'electron';
 import { Client } from 'wwebjs-electron';
 import pie from "puppeteer-in-electron";
 import isDev from 'electron-is-dev'
@@ -23,8 +23,8 @@ pie.initialize(app)
     const createMainWindow = async (): Promise<BrowserWindow> => {
       // Create the browser window.
       const mainWindow = new BrowserWindow({
-        height: 600,
-        width: 800,
+        height: 512,
+        width: 512,
         webPreferences: {
           preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
           nodeIntegration: true
@@ -33,9 +33,6 @@ pie.initialize(app)
 
       // and load the index.html of the app.
       mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-
-      // Open the DevTools.
-      mainWindow.webContents.openDevTools();
       return mainWindow
     };
     const createWWebWindow = async (): Promise<{ browser: Browser, window: BrowserWindow }> => {
@@ -133,6 +130,17 @@ pie.initialize(app)
         console.error(error);
         throw error
       }
+
+      globalShortcut.register('F12', () => {
+        mainWindow.webContents.toggleDevTools()
+      })
+
+      console.log(Notification.isSupported());
+
+      new Notification({
+        title: 'WM Status',
+        body: 'WhatsApp conectado!'
+      }).show()
 
       if (isDev && process.platform === 'win32') {
         // Set the path of electron.exe and your app.
