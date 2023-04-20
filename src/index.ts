@@ -63,20 +63,18 @@ pie.initialize(app)
             console.log(resolve(__dirname, 'icon.png'));
 
             const tray = new Tray(resolve(__dirname, 'icon.png'))
+            tray.on('click', () => {
+              mainWindow.close()
+              window.close()
+            })
             const contextMenu = Menu.buildFromTemplate([
-              { label: 'Item1', type: 'radio' },
-              { label: 'Item2', type: 'radio' },
-              { label: 'Item3', type: 'radio', checked: true },
-              { label: 'Item4', type: 'radio' }
+              { label: 'Desconectar'}
             ])
             tray.setToolTip('This is my application.')
             tray.setContextMenu(contextMenu)
             mainWindow.on('close', (e) => {
               e.preventDefault()
               mainWindow.hide()
-              setTimeout(() => {
-                mainWindow.show()
-              }, 2000);
             })
           }
 
@@ -136,9 +134,11 @@ pie.initialize(app)
             mainWindow.webContents.send('error', message)
           })
 
-          setTimeout(() => {
+          const interval = setInterval(() => {
             if (needRefresh) {
               wwebWindow.webContents.reloadIgnoringCache()
+            } else {
+              clearInterval(interval)
             }
           }, 30 * 1000);
 
