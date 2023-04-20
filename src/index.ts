@@ -59,9 +59,10 @@ pie.initialize(app)
           const { browser, window } = await createWWebWindow()
           wwebWindow = window
 
-          mainWindow.on('close', () => {
-            window.close()
-          })
+          // mainWindow.on('close', (e) => {
+          //   e.preventDefault()
+          //   mainWindow.hide()
+          // })
 
           const gotTheLock = app.requestSingleInstanceLock()
 
