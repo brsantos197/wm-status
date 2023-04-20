@@ -40,7 +40,7 @@ pie.initialize(app)
     };
     const createWWebWindow = async (): Promise<{ browser: Browser, window: BrowserWindow }> => {
       const window = new BrowserWindow({
-        show: false
+        // show: false
       })
       window.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 

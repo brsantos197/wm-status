@@ -22,8 +22,8 @@ export const WhatsApp = ({ qrcode, ready, loading, disconnected }: WhatsAppProps
             {loading.status ? (
               <>
                 <h1 className="text-lg font-bold text-green-600">{loading.message ?? 'Carregando'}</h1>
-                <div className="animate-spin rounded-full border-4 border-t-teal-500  w-10 h-10 " ></div>
-                <progress className="bg-zinc-50 border border-zinc-950 text-teal-600" max={100} value={loading.percent}></progress>
+                <div className="animate-spin rounded-full border-4 border-t-emerald-500  w-10 h-10 " ></div>
+                <progress className="border border-emerald-600 rounded h-2 " max={100} value={loading.percent}></progress>
               </>
             ) :
               null
@@ -39,7 +39,7 @@ export const WhatsApp = ({ qrcode, ready, loading, disconnected }: WhatsAppProps
                       <QRCodeCanvas
                         value={qrcode}
                         size={256}
-                        fgColor={colors.teal['500']}
+                        fgColor={colors.emerald['500']}
                       />
                     </>
                   ) : null
