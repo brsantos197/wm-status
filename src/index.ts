@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import { Client } from 'wwebjs-electron';
 import pie from "puppeteer-in-electron";
 import isDev from 'electron-is-dev'
@@ -38,16 +38,11 @@ pie.initialize(app)
       mainWindow.webContents.openDevTools();
       return mainWindow
     };
-    const createWWebWindow = async (mainWindow: BrowserWindow): Promise<{ browser: Browser, window: BrowserWindow }> => {
+    const createWWebWindow = async (): Promise<{ browser: Browser, window: BrowserWindow }> => {
       const window = new BrowserWindow({
-        width: 0,
-        height: 0
+        show: false
       })
       window.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-
-      mainWindow.on('close', () => {
-        window.close()
-      })
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -58,70 +53,81 @@ pie.initialize(app)
     const main = async () => {
       let mainWindow: BrowserWindow
       let wwebWindow: BrowserWindow
+      let needRefresh = true
       try {
         mainWindow = await createMainWindow()
 
-        const { browser, window } = await createWWebWindow(mainWindow)
-        wwebWindow = window
+        mainWindow.once('ready-to-show', async () => {
+          console.log('MAIN WINDOW READY');
+          const { browser, window } = await createWWebWindow()
+          wwebWindow = window
 
-        const gotTheLock = app.requestSingleInstanceLock()
+          mainWindow.on('close', () => {
+            window.close()
+          })
 
-        if (!gotTheLock) {
-          app.quit()
-        } else {
-          app.on('second-instance', (event, commandLine) => {
-            // Someone tried to run a second instance, we should focus our window.
-            const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
+          const gotTheLock = app.requestSingleInstanceLock()
 
-            if (mainWindow) {
+          if (!gotTheLock) {
+            app.quit()
+          } else {
+            app.on('second-instance', (event, commandLine) => {
+              // Someone tried to run a second instance, we should focus our window.
+              const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
 
-              if (mainWindow.isMinimized()) mainWindow.restore()
-              whatsappClient.sendMessage(`${contact}@c.us`, message)
+              if (mainWindow) {
+
+                if (mainWindow.isMinimized()) mainWindow.restore()
+                whatsappClient.sendMessage(`${contact}@c.us`, message)
+              }
+              // the commandLine is array of strings in which last element is deep link url
+              // the url str ends with /
+            })
+          }
+
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          whatsappClient = new Client(browser, wwebWindow);
+
+          whatsappClient.on('qr', (qr: string) => {
+            needRefresh = false
+            mainWindow.webContents.send('onqrcode', qr)
+          });
+
+          whatsappClient.on('ready', () => {
+            needRefresh = false
+            console.log('Client is ready!');
+            mainWindow.webContents.send('onconnected', true)
+
+          });
+
+          whatsappClient.on('disconnected', () => {
+            console.log('Client is disconnected!');
+            mainWindow.webContents.send('ondisconnected', true)
+          });
+
+          whatsappClient.on('loading_screen', (percent, message) => {
+            needRefresh = false
+            console.log(percent, message);
+            mainWindow.webContents.send('onloading', { percent, message })
+          })
+
+          whatsappClient.on('auth_failure', (message) => {
+            mainWindow.webContents.send('error', message)
+          })
+
+          setTimeout(() => {
+            if (needRefresh) {
+              wwebWindow.webContents.reloadIgnoringCache()
             }
-            // the commandLine is array of strings in which last element is deep link url
-            // the url str ends with /
-          })
-        }
+          }, 20000);
 
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        whatsappClient = new Client(browser, wwebWindow);
-
-        mainWindow.on('ready-to-show', () => {
-          window.on('ready-to-show', () => {
-            setTimeout(() => {
-              window.webContents.reloadIgnoringCache()
-              window.hide()
-              window.removeAllListeners('ready-to-show')
-            }, 1000);
-          })
+          try {
+            await whatsappClient.initialize();
+          } catch (error) {
+            console.error('AQUI ===>', error);
+          }
         })
-
-        whatsappClient.on('qr', (qr: string) => {
-          mainWindow.webContents.send('onloading', true)
-          mainWindow.webContents.send('onqrcode', qr)
-        });
-
-        whatsappClient.on('ready', () => {
-          console.log('Client is ready!');
-          mainWindow.webContents.send('onconnected', true)
-
-        });
-
-        whatsappClient.on('disconnected', () => {
-          console.log('Client is disconnected!');
-          mainWindow.webContents.send('ondisconnected', true)
-        });
-
-        whatsappClient.on('loading_screen', () => {
-          mainWindow.webContents.send('onloading', true)
-        })
-
-        whatsappClient.on('auth_failure', (message) => {
-          mainWindow.webContents.send('error', message)
-        })
-
-        await whatsappClient.initialize();
       } catch (error) {
         mainWindow.webContents.send('error', error)
         console.error(error);

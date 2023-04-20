@@ -6,7 +6,7 @@ export const WhatsAppApi = {
   onqrcode: (callback: (event: Electron.IpcRendererEvent, qrcode: string) => void) => ipcRenderer.on('onqrcode', callback),
   onconnected: (callback: (event: Electron.IpcRendererEvent, value: boolean) => void) => ipcRenderer.on('onconnected', callback),
   ondisconnected: (callback: (event: Electron.IpcRendererEvent, value: boolean) => void) => ipcRenderer.on('ondisconnected', callback),
-  onloading: (callback: (event: Electron.IpcRendererEvent, value: boolean) => void) => ipcRenderer.on('onloading', callback),
+  onloading: (callback: (event: Electron.IpcRendererEvent, value: { percent: number, message: string }) => void) => ipcRenderer.on('onloading', callback),
 }
 
 contextBridge.exposeInMainWorld('WhatsApp', WhatsAppApi)

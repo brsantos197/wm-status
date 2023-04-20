@@ -5,7 +5,11 @@ import React from "react";
 interface WhatsAppProps {
   qrcode: string
   ready: boolean
-  loading: boolean
+  loading: {
+    status: boolean;
+    message: string | null;
+    percent: number;
+  }
   disconnected: boolean
 }
 
@@ -15,15 +19,16 @@ export const WhatsApp = ({ qrcode, ready, loading, disconnected }: WhatsAppProps
       {
         !ready ? (
           <>
-            {loading ? (
+            {loading.status ? (
               <>
-                <h1 className="text-lg font-bold text-green-600">{qrcode ? 'Conectando' : 'Carregando'}</h1>
+                <h1 className="text-lg font-bold text-green-600">{loading.message ?? 'Carregando'}</h1>
                 <div className="animate-spin rounded-full border-4 border-t-teal-500  w-10 h-10 " ></div>
+                <progress className="bg-zinc-50 border border-zinc-950 text-teal-600" max={100} value={loading.percent}></progress>
               </>
             ) :
               null
             }
-            {qrcode && !loading ? (
+            {qrcode && !loading.status ? (
               <>
                 {
                   !disconnected ? (

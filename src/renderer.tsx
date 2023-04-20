@@ -46,29 +46,29 @@ const App = () => {
   const [qrcode, setQrcode] = useState('')
   const [ready, setReady] = useState(false)
   const [disconnected, setDisconnected] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState({ status: true, message: null, percent: 0 })
 
   useEffect(() => {
     window.WhatsApp.onqrcode((event, qr: string) => {
-      setLoading(false)
+      setLoading(state => ({ ...state, status: false }))
       setQrcode(qr)
     })
-    
+
     window.WhatsApp.ondisconnected(() => {
       setReady(false)
       setDisconnected(true)
       console.log('Disconectado');
     })
-    
+
     window.WhatsApp.onconnected(() => {
       setReady(true)
-      setLoading(false)
+      setLoading(state => ({ ...state, status: false }))
       console.log('Conectado');
     })
 
-    window.WhatsApp.onloading(() => {
-      setLoading(true)
-      console.log('Carregando');
+    window.WhatsApp.onloading((event, { message, percent }) => {
+      setLoading(() => ({ status: true, message, percent }))
+      console.log(message);
     })
   }, [])
 
@@ -80,5 +80,3 @@ const App = () => {
 }
 
 root.render(<App />)
-
-
