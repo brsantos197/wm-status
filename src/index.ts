@@ -1,4 +1,4 @@
-import { app, BrowserWindow, globalShortcut, Notification } from 'electron';
+import { app, BrowserWindow, globalShortcut, Menu, Notification, Tray } from 'electron';
 import { Client } from 'wwebjs-electron';
 import pie from "puppeteer-in-electron";
 import isDev from 'electron-is-dev'
@@ -37,7 +37,7 @@ pie.initialize(app)
     };
     const createWWebWindow = async (): Promise<{ browser: Browser, window: BrowserWindow }> => {
       const window = new BrowserWindow({
-        show: false
+        // show: false
       })
       window.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
@@ -59,10 +59,26 @@ pie.initialize(app)
           const { browser, window } = await createWWebWindow()
           wwebWindow = window
 
-          // mainWindow.on('close', (e) => {
-          //   e.preventDefault()
-          //   mainWindow.hide()
-          // })
+          if (process.platform === 'win32') {
+            console.log(resolve(__dirname, 'icon.png'));
+
+            const tray = new Tray(resolve(__dirname, 'icon.png'))
+            const contextMenu = Menu.buildFromTemplate([
+              { label: 'Item1', type: 'radio' },
+              { label: 'Item2', type: 'radio' },
+              { label: 'Item3', type: 'radio', checked: true },
+              { label: 'Item4', type: 'radio' }
+            ])
+            tray.setToolTip('This is my application.')
+            tray.setContextMenu(contextMenu)
+            mainWindow.on('close', (e) => {
+              e.preventDefault()
+              mainWindow.hide()
+              setTimeout(() => {
+                mainWindow.show()
+              }, 2000);
+            })
+          }
 
           const gotTheLock = app.requestSingleInstanceLock()
 

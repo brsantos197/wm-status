@@ -48,6 +48,7 @@
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "electron-is-dev": "^2.0.0",
     "electron-squirrel-startup": "^1.0.0",
+    "file-loader": "^6.2.0",
     "fluent-ffmpeg": "^2.1.2",
     "puppeteer-core": "^19.9.1",
     "puppeteer-in-electron": "^3.0.5",
