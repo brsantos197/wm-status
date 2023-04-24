@@ -179,8 +179,6 @@ pie.initialize(app)
         } else {
 
           app.on('second-instance', async (event, commandLine) => {
-            console.log('CAIU AQUI SECOND INSTANCE ===>');
-
             // Someone tried to run a second instance, we should focus our window.
             const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
 
