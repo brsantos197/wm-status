@@ -1,6 +1,7 @@
 import type { Configuration } from 'webpack';
 
 import { rules } from './webpack.rules';
+import { plugins } from './webpack.plugins';
 
 rules.push({
   test: /\.(png|jpeg|jpg|gif)$/,
@@ -18,6 +19,7 @@ export const mainConfig: Configuration = {
    * that runs in the main process.
    */
   entry: ['./src/index.ts', './src/app_icon.png', './src/close_icon.png'],
+  plugins,
   // Put your normal webpack config below here
   module: {
     rules,
