@@ -128,6 +128,10 @@ pie.initialize(app)
 
             whatsappClient.on('disconnected', () => {
               console.log('Client is disconnected!');
+              new Notification({
+                title: 'WM Status',
+                body: 'WhatsApp desconectado!'
+              }).show()
               mainWindow.webContents.send('ondisconnected', true)
             });
 
