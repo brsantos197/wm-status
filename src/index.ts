@@ -1,4 +1,4 @@
-import { app, BrowserWindow, globalShortcut, Menu, nativeImage, Notification, Tray } from 'electron';
+import { app, BrowserWindow, dialog, globalShortcut, Menu, nativeImage, Notification, Tray } from 'electron';
 import { Client } from 'wwebjs-electron';
 import pie from "puppeteer-in-electron";
 import isDev from 'electron-is-dev'
@@ -59,19 +59,6 @@ pie.initialize(app)
       if (!gotTheLock) {
         app.quit()
       } else {
-        app.on('second-instance', (event, commandLine) => {
-          // Someone tried to run a second instance, we should focus our window.
-          const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
-
-          if (mainWindow) {
-
-            if (mainWindow.isMinimized()) mainWindow.restore()
-            whatsappClient.sendMessage(`${contact}@c.us`, message)
-          }
-          // the commandLine is array of strings in which last element is deep link url
-          // the url str ends with /
-        })
-
         try {
           mainWindow = await createMainWindow()
 
@@ -190,6 +177,24 @@ pie.initialize(app)
           // Setting this is required to get this working in dev mode.
           app.setAsDefaultProtocolClient('wmstatus-dev', process.execPath, [resolve(process.argv[1]), '']);
         } else {
+
+          app.on('second-instance', async (event, commandLine) => {
+            // Someone tried to run a second instance, we should focus our window.
+            const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
+
+            if (mainWindow) {
+
+              if (mainWindow.isMinimized()) mainWindow.restore()
+              try {
+                await whatsappClient.sendMessage(`${contact}@c.us`, message)
+              } catch (error) {
+                dialog.showErrorBox('Deu Ruim!', error)
+              }
+            }
+            // the commandLine is array of strings in which last element is deep link url
+            // the url str ends with /
+          })
+
           if (process.platform === 'darwin') {
             app.on('open-url', function (event, url) {
               const { contact, message } = decodeMessage(url)
