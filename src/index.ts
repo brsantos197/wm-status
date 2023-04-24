@@ -53,147 +53,148 @@ pie.initialize(app)
       let mainWindow: BrowserWindow
       let wwebWindow: BrowserWindow
       let needRefresh = true
-      try {
-        mainWindow = await createMainWindow()
 
-        mainWindow.once('ready-to-show', async () => {
-          console.log('MAIN WINDOW READY');
-          const { browser, window } = await createWWebWindow()
-          wwebWindow = window
+      const gotTheLock = app.requestSingleInstanceLock()
 
-          if (process.platform === 'win32') {
-            const tray = new Tray(appIconPath)
-            tray.on('click', () => {
-              mainWindow.show()
-            })
-            const contextMenu = Menu.buildFromTemplate([
-              {
-                label: 'Sair', icon: closeIconPath, click: () => {
-                  mainWindow.removeAllListeners()
-                  app.quit()
-                }
-              }
-            ])
-            tray.setToolTip('WM Status App')
-            const ballon = {
-              title: 'Segundo Plano',
-              content: 'Rodando em segundo plano',
-              icon: appIconPath
-            }
-            tray.setContextMenu(contextMenu)
-            mainWindow.on('close', (e) => {
-              e.preventDefault()
-              mainWindow.hide()
-            })
-            mainWindow.on('minimize', (e: Electron.Event) => {
-              e.preventDefault()
-              mainWindow.hide()
-            })
-            mainWindow.once('hide', () => {
-              tray.displayBalloon(ballon)
-            })
-          } else {
-            mainWindow.on('close', () => {
-              wwebWindow.close()
-            })
-          }
-
-          const gotTheLock = app.requestSingleInstanceLock()
-
-          if (!gotTheLock) {
-            app.quit()
-          } else {
-            app.on('second-instance', (event, commandLine) => {
-              // Someone tried to run a second instance, we should focus our window.
-              const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
-
-              if (mainWindow) {
-
-                if (mainWindow.isMinimized()) mainWindow.restore()
-                whatsappClient.sendMessage(`${contact}@c.us`, message)
-              }
-              // the commandLine is array of strings in which last element is deep link url
-              // the url str ends with /
-            })
-          }
-
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          whatsappClient = new Client(browser, wwebWindow);
-
-          whatsappClient.on('qr', (qr: string) => {
-            needRefresh = false
-            mainWindow.webContents.send('onqrcode', qr)
-          });
-
-          whatsappClient.on('ready', () => {
-            needRefresh = false
-            console.log('Client is ready!');
-            if (!mainWindow.isFocused()) {
-              new Notification({
-                title: 'WM Status',
-                body: 'WhatsApp conectado!'
-              }).show()
-            }
-            mainWindow.webContents.send('onconnected', true)
-
-          });
-
-          whatsappClient.on('disconnected', () => {
-            console.log('Client is disconnected!');
-            mainWindow.webContents.send('ondisconnected', true)
-          });
-
-          whatsappClient.on('loading_screen', (percent, message) => {
-            needRefresh = false
-            console.log(percent, message);
-            mainWindow.webContents.send('onloading', { percent, message })
-          })
-
-          whatsappClient.on('auth_failure', (message) => {
-            mainWindow.webContents.send('error', message)
-          })
-
-          let counter = 15
-          const interval = setInterval(() => {
-            if (needRefresh) {
-              wwebWindow.webContents.reloadIgnoringCache()
-              counter += 5
-            } else {
-              clearInterval(interval)
-            }
-          }, counter * 1000);
-
-          try {
-            await whatsappClient.initialize();
-          } catch (error) {
-            console.error('AQUI ===>', error);
-          }
-        })
-      } catch (error) {
-        mainWindow.webContents.send('error', error)
-        console.error(error);
-        throw error
-      }
-
-      globalShortcut.register('F12', () => {
-        mainWindow.webContents.toggleDevTools()
-      })
-
-      if (isDev && process.platform === 'win32') {
-        // Set the path of electron.exe and your app.
-        // These two additional parameters are only available on windows.
-        // Setting this is required to get this working in dev mode.
-        app.setAsDefaultProtocolClient('wmstatus-dev', process.execPath, [resolve(process.argv[1]), '']);
+      if (!gotTheLock) {
+        app.quit()
       } else {
-        if (process.platform === 'darwin') {
-          app.on('open-url', function (event, url) {
-            const { contact, message } = decodeMessage(url)
-            console.log(contact, message);
+        app.on('second-instance', (event, commandLine) => {
+          // Someone tried to run a second instance, we should focus our window.
+          const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
+
+          if (mainWindow) {
+
+            if (mainWindow.isMinimized()) mainWindow.restore()
             whatsappClient.sendMessage(`${contact}@c.us`, message)
-          });
+          }
+          // the commandLine is array of strings in which last element is deep link url
+          // the url str ends with /
+        })
+
+        try {
+          mainWindow = await createMainWindow()
+
+          mainWindow.once('ready-to-show', async () => {
+            console.log('MAIN WINDOW READY');
+            const { browser, window } = await createWWebWindow()
+            wwebWindow = window
+
+            if (process.platform === 'win32') {
+              const tray = new Tray(appIconPath)
+              tray.on('click', () => {
+                mainWindow.show()
+              })
+              const contextMenu = Menu.buildFromTemplate([
+                {
+                  label: 'Sair', icon: closeIconPath, click: () => {
+                    mainWindow.removeAllListeners()
+                    app.quit()
+                  }
+                }
+              ])
+              tray.setToolTip('WM Status App')
+              const ballon = {
+                title: 'Segundo Plano',
+                content: 'Rodando em segundo plano',
+                icon: appIconPath
+              }
+              tray.setContextMenu(contextMenu)
+              mainWindow.on('close', (e) => {
+                e.preventDefault()
+                mainWindow.hide()
+              })
+              mainWindow.on('minimize', (e: Electron.Event) => {
+                e.preventDefault()
+                mainWindow.hide()
+              })
+              mainWindow.once('hide', () => {
+                tray.displayBalloon(ballon)
+              })
+            } else {
+              mainWindow.on('close', () => {
+                wwebWindow.close()
+              })
+            }
+
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            whatsappClient = new Client(browser, wwebWindow);
+
+            whatsappClient.on('qr', (qr: string) => {
+              needRefresh = false
+              mainWindow.webContents.send('onqrcode', qr)
+            });
+
+            whatsappClient.on('ready', () => {
+              needRefresh = false
+              console.log('Client is ready!');
+              if (!mainWindow.isFocused()) {
+                new Notification({
+                  title: 'WM Status',
+                  body: 'WhatsApp conectado!'
+                }).show()
+              }
+              mainWindow.webContents.send('onconnected', true)
+
+            });
+
+            whatsappClient.on('disconnected', () => {
+              console.log('Client is disconnected!');
+              mainWindow.webContents.send('ondisconnected', true)
+            });
+
+            whatsappClient.on('loading_screen', (percent, message) => {
+              needRefresh = false
+              console.log(percent, message);
+              mainWindow.webContents.send('onloading', { percent, message })
+            })
+
+            whatsappClient.on('auth_failure', (message) => {
+              mainWindow.webContents.send('error', message)
+            })
+
+            let counter = 15
+            const interval = setInterval(() => {
+              if (needRefresh) {
+                wwebWindow.webContents.reloadIgnoringCache()
+                counter += 5
+              } else {
+                clearInterval(interval)
+              }
+            }, counter * 1000);
+
+            try {
+              await whatsappClient.initialize();
+            } catch (error) {
+              console.error('AQUI ===>', error);
+            }
+          })
+        } catch (error) {
+          mainWindow.webContents.send('error', error)
+          console.error(error);
+          throw error
         }
-        app.setAsDefaultProtocolClient('wmstatus');
+
+        globalShortcut.register('F12', () => {
+          mainWindow.webContents.toggleDevTools()
+        })
+
+        if (isDev && process.platform === 'win32') {
+          // Set the path of electron.exe and your app.
+          // These two additional parameters are only available on windows.
+          // Setting this is required to get this working in dev mode.
+          app.setAsDefaultProtocolClient('wmstatus-dev', process.execPath, [resolve(process.argv[1]), '']);
+        } else {
+          if (process.platform === 'darwin') {
+            app.on('open-url', function (event, url) {
+              const { contact, message } = decodeMessage(url)
+              console.log(contact, message);
+              whatsappClient.sendMessage(`${contact}@c.us`, message)
+            });
+          }
+          app.setAsDefaultProtocolClient('wmstatus');
+        }
       }
 
     }
