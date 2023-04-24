@@ -1,4 +1,4 @@
-import { app, BrowserWindow, globalShortcut, Menu, Notification, Tray } from 'electron';
+import { app, BrowserWindow, globalShortcut, Menu, nativeImage, Notification, Tray } from 'electron';
 import { Client } from 'wwebjs-electron';
 import pie from "puppeteer-in-electron";
 import isDev from 'electron-is-dev'
@@ -17,8 +17,9 @@ if (require('electron-squirrel-startup')) {
 }
 
 let whatsappClient: Client
-const appIconPath = resolve(__dirname, 'app_icon.png')
-const closeIconPath = resolve(__dirname, 'close_icon.png')
+const appIconPath = nativeImage.createFromPath(resolve(__dirname, 'app_icon.png')).resize({ width: 16, height: 16 })
+const closeIconPath = nativeImage.createFromPath(resolve(__dirname, 'close_icon.png')).resize({ width: 16, height: 16 })
+
 pie.initialize(app)
   .then(() => {
     const createMainWindow = async (): Promise<BrowserWindow> => {
@@ -183,7 +184,7 @@ pie.initialize(app)
         // Set the path of electron.exe and your app.
         // These two additional parameters are only available on windows.
         // Setting this is required to get this working in dev mode.
-        app.setAsDefaultProtocolClient('wmstatus-dev', process.execPath, [resolve(process.argv[1]), 'teste']);
+        app.setAsDefaultProtocolClient('wmstatus-dev', process.execPath, [resolve(process.argv[1]), '']);
       } else {
         if (process.platform === 'darwin') {
           app.on('open-url', function (event, url) {
