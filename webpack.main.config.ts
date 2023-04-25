@@ -4,7 +4,7 @@ import { rules } from './webpack.rules';
 import { plugins } from './webpack.plugins';
 
 rules.push({
-  test: /\.(png|jpeg|jpg|gif)$/,
+  test: /\.(png|jpeg|jpg|gif|ico)$/,
   use: {
     loader: 'file-loader',
     options: {
@@ -18,14 +18,14 @@ export const mainConfig: Configuration = {
    * This is the main entry point for your application, it's the first file
    * that runs in the main process.
    */
-  entry: ['./src/index.ts', './src/app_icon.png', './src/close_icon.png'],
+  entry: ['./src/index.ts', './src/app_icon.png', './src/close_icon.png', './src/app_icon.ico', './src/install_icon.ico'],
   plugins,
   // Put your normal webpack config below here
   module: {
     rules,
   },
   resolve: {
-    extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json', '.png'],
+    extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json', '.png', 'ico', 'icns'],
   },
   optimization: { minimize: false }
 };

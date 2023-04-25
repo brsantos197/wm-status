@@ -189,7 +189,6 @@ pie.initialize(app)
     } else {
       app.on('second-instance', async (event, commandLine) => {
         // Someone tried to run a second instance, we should focus our window.
-        dialog.showErrorBox('second-instance!', commandLine[commandLine.length - 1])
         const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
         mainWindow.webContents.send('log', 'SECONDE INSTANCE')
         if (mainWindow) {
@@ -210,7 +209,6 @@ pie.initialize(app)
       })
 
       app.on('open-url', async (event, url) => {
-        dialog.showErrorBox('open-url', url)
         const { contact, message } = decodeMessage(url)
         if (mainWindow) {
           try {

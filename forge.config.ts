@@ -10,7 +10,7 @@ import { rendererConfig } from './webpack.renderer.config';
 
 const config: ForgeConfig = {
   packagerConfig: {
-    icon: './src/app_icon',
+    icon: './src/app_icon.icon',
     protocols: [
       {
         name: 'wmstatus',
@@ -19,9 +19,7 @@ const config: ForgeConfig = {
     ]
   },
   rebuildConfig: {},
-  makers: [new MakerSquirrel({
-    setupIcon: './src/install_icon.ico'
-  }), new MakerZIP({}, ['darwin']), new MakerRpm({}), new MakerDeb({})],
+  makers: [new MakerSquirrel({ setupIcon: './src/install_icon.ico' }), new MakerZIP({}, ['darwin']), new MakerRpm({}), new MakerDeb({})],
   plugins: [
     new WebpackPlugin({
       mainConfig,
