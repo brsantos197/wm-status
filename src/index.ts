@@ -189,6 +189,7 @@ pie.initialize(app)
         app.on('second-instance', async (event, commandLine) => {
           // Someone tried to run a second instance, we should focus our window.
           const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
+          mainWindow.webContents.send('log', 'SECONDE INSTANCE')
 
           if (mainWindow) {
             if (mainWindow.isMinimized()) mainWindow.restore()
@@ -196,11 +197,14 @@ pie.initialize(app)
               if (whatsAppReady) {
                 await whatsappClient.sendMessage(`${contact}@c.us`, message)
               } else {
+                mainWindow.webContents.send('warn', 'LOSTMESSAGES')
                 lostMessages.push({ contact, message })
               }
             } catch (error) {
               dialog.showErrorBox('Ops!', error)
             }
+          } else {
+            lostMessages.push({ contact, message })
           }
           // the commandLine is array of strings in which last element is deep link url
           // the url str ends with /
