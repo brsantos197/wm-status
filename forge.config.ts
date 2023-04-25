@@ -11,8 +11,7 @@ import { resolve } from "path";
 
 const config: ForgeConfig = {
   packagerConfig: {
-    icon: resolve(__dirname, 'app_icon.png'),
-    asar: true,
+    icon: './src/app_icon',
     protocols: [
       {
         name: 'wmstatus',
