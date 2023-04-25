@@ -22,7 +22,7 @@ let mainWindow: BrowserWindow
 let wwebWindow: BrowserWindow
 
 const lostMessages: { contact: string, message: string }[] = []
-const appIconPath = nativeImage.createFromPath(resolve(__dirname, 'app_icon.png')).resize({ width: 16, height: 16 })
+const appIconPath = nativeImage.createFromPath(resolve(__dirname, 'app_icon.png'))
 const closeIconPath = nativeImage.createFromPath(resolve(__dirname, 'close_icon.png')).resize({ width: 16, height: 16 })
 
 pie.initialize(app)
@@ -36,6 +36,7 @@ pie.initialize(app)
           preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
           nodeIntegration: true
         },
+        icon: resolve(__dirname, 'app_icon.png')
       });
 
       // and load the index.html of the app.
@@ -65,7 +66,7 @@ pie.initialize(app)
           wwebWindow = window
 
           if (process.platform === 'win32') {
-            const tray = new Tray(appIconPath)
+            const tray = new Tray(appIconPath.resize({ width: 16, height: 16 }))
             tray.on('click', () => {
               mainWindow.show()
             })
@@ -81,7 +82,7 @@ pie.initialize(app)
             const ballon = {
               title: 'Segundo Plano',
               content: 'Rodando em segundo plano',
-              icon: appIconPath
+              icon: appIconPath.resize({ width: 16, height: 16 })
             }
             tray.setContextMenu(contextMenu)
             mainWindow.on('close', (e) => {

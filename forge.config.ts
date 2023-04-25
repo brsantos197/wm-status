@@ -7,9 +7,11 @@ import { WebpackPlugin } from '@electron-forge/plugin-webpack';
 
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
+import { resolve } from "path";
 
 const config: ForgeConfig = {
   packagerConfig: {
+    icon: resolve(__dirname, 'app_icon.png'),
     asar: true,
     protocols: [
       {
