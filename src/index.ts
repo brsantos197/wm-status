@@ -183,42 +183,42 @@ pie.initialize(app)
           // Setting this is required to get this working in dev mode.
           app.setAsDefaultProtocolClient('wmstatus-dev', process.execPath, [resolve(process.argv[1]), '']);
         } else {
-
-          app.on('second-instance', async (event, commandLine) => {
-            // Someone tried to run a second instance, we should focus our window.
-            const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
-
-            if (mainWindow) {
-              if (mainWindow.isMinimized()) mainWindow.restore()
-              try {
-                if (whatsAppReady) {
-                  await whatsappClient.sendMessage(`${contact}@c.us`, message)
-                } else {
-                  lostMessages.push({ contact, message })
-                }
-              } catch (error) {
-                dialog.showErrorBox('Ops!', error)
-              }
-            }
-            // the commandLine is array of strings in which last element is deep link url
-            // the url str ends with /
-          })
-
-          if (process.platform === 'darwin') {
-            app.on('open-url', async (event, url) => {
-              const { contact, message } = decodeMessage(url)
-              try {
-                if (whatsAppReady) {
-                  await whatsappClient.sendMessage(`${contact}@c.us`, message)
-                } else {
-                  lostMessages.push({ contact, message })
-                }
-              } catch (error) {
-                dialog.showErrorBox('Ops!', error)
-              }
-            });
-          }
           app.setAsDefaultProtocolClient('wmstatus');
+        }
+
+        app.on('second-instance', async (event, commandLine) => {
+          // Someone tried to run a second instance, we should focus our window.
+          const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
+
+          if (mainWindow) {
+            if (mainWindow.isMinimized()) mainWindow.restore()
+            try {
+              if (whatsAppReady) {
+                await whatsappClient.sendMessage(`${contact}@c.us`, message)
+              } else {
+                lostMessages.push({ contact, message })
+              }
+            } catch (error) {
+              dialog.showErrorBox('Ops!', error)
+            }
+          }
+          // the commandLine is array of strings in which last element is deep link url
+          // the url str ends with /
+        })
+
+        if (process.platform === 'darwin') {
+          app.on('open-url', async (event, url) => {
+            const { contact, message } = decodeMessage(url)
+            try {
+              if (whatsAppReady) {
+                await whatsappClient.sendMessage(`${contact}@c.us`, message)
+              } else {
+                lostMessages.push({ contact, message })
+              }
+            } catch (error) {
+              dialog.showErrorBox('Ops!', error)
+            }
+          });
         }
       }
 
