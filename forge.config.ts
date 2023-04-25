@@ -7,7 +7,6 @@ import { WebpackPlugin } from '@electron-forge/plugin-webpack';
 
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
-import { resolve } from "path";
 
 const config: ForgeConfig = {
   packagerConfig: {
@@ -20,7 +19,9 @@ const config: ForgeConfig = {
     ]
   },
   rebuildConfig: {},
-  makers: [new MakerSquirrel({}), new MakerZIP({}, ['darwin']), new MakerRpm({}), new MakerDeb({})],
+  makers: [new MakerSquirrel({
+    setupIcon: './src/install_icon.ico'
+  }), new MakerZIP({}, ['darwin']), new MakerRpm({}), new MakerDeb({})],
   plugins: [
     new WebpackPlugin({
       mainConfig,
