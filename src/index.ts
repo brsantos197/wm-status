@@ -17,6 +17,8 @@ if (require('electron-squirrel-startup')) {
 }
 
 let whatsappClient: Client
+let whatsAppReady = false
+const lostMessages: { contact: string, message: string }[] = []
 const appIconPath = nativeImage.createFromPath(resolve(__dirname, 'app_icon.png')).resize({ width: 16, height: 16 })
 const closeIconPath = nativeImage.createFromPath(resolve(__dirname, 'close_icon.png')).resize({ width: 16, height: 16 })
 
@@ -113,8 +115,9 @@ pie.initialize(app)
               mainWindow.webContents.send('onqrcode', qr)
             });
 
-            whatsappClient.on('ready', () => {
+            whatsappClient.on('ready', async () => {
               needRefresh = false
+              whatsAppReady = true
               console.log('Client is ready!');
               if (!mainWindow.isFocused()) {
                 new Notification({
@@ -122,8 +125,11 @@ pie.initialize(app)
                   body: 'WhatsApp conectado!'
                 }).show()
               }
+              while (lostMessages.length) {
+                await whatsappClient.sendMessage(`${lostMessages[0].contact}@c.us`, lostMessages[0].message)
+                lostMessages.shift()
+              }
               mainWindow.webContents.send('onconnected', true)
-
             });
 
             whatsappClient.on('disconnected', () => {
@@ -183,12 +189,15 @@ pie.initialize(app)
             const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
 
             if (mainWindow) {
-
               if (mainWindow.isMinimized()) mainWindow.restore()
               try {
-                await whatsappClient.sendMessage(`${contact}@c.us`, message)
+                if (whatsAppReady) {
+                  await whatsappClient.sendMessage(`${contact}@c.us`, message)
+                } else {
+                  lostMessages.push({ contact, message })
+                }
               } catch (error) {
-                dialog.showErrorBox('Deu Ruim!', error)
+                dialog.showErrorBox('Ops!', error)
               }
             }
             // the commandLine is array of strings in which last element is deep link url
@@ -196,10 +205,17 @@ pie.initialize(app)
           })
 
           if (process.platform === 'darwin') {
-            app.on('open-url', function (event, url) {
+            app.on('open-url', async (event, url) => {
               const { contact, message } = decodeMessage(url)
-              console.log(contact, message);
-              whatsappClient.sendMessage(`${contact}@c.us`, message)
+              try {
+                if (whatsAppReady) {
+                  await whatsappClient.sendMessage(`${contact}@c.us`, message)
+                } else {
+                  lostMessages.push({ contact, message })
+                }
+              } catch (error) {
+                dialog.showErrorBox('Ops!', error)
+              }
             });
           }
           app.setAsDefaultProtocolClient('wmstatus');
