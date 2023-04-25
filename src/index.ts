@@ -188,6 +188,8 @@ pie.initialize(app)
 
         app.on('second-instance', async (event, commandLine) => {
           // Someone tried to run a second instance, we should focus our window.
+          dialog.showErrorBox('caiu aqui!', commandLine[commandLine.length - 1])
+
           const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
           mainWindow.webContents.send('log', 'SECONDE INSTANCE')
 
@@ -210,20 +212,19 @@ pie.initialize(app)
           // the url str ends with /
         })
 
-        if (process.platform === 'darwin') {
-          app.on('open-url', async (event, url) => {
-            const { contact, message } = decodeMessage(url)
-            try {
-              if (whatsAppReady) {
-                await whatsappClient.sendMessage(`${contact}@c.us`, message)
-              } else {
-                lostMessages.push({ contact, message })
-              }
-            } catch (error) {
-              dialog.showErrorBox('Ops!', error)
+        app.on('open-url', async (event, url) => {
+          dialog.showErrorBox('caiu aqui!', url)
+          const { contact, message } = decodeMessage(url)
+          try {
+            if (whatsAppReady) {
+              await whatsappClient.sendMessage(`${contact}@c.us`, message)
+            } else {
+              lostMessages.push({ contact, message })
             }
-          });
-        }
+          } catch (error) {
+            dialog.showErrorBox('Ops!', error)
+          }
+        });
       }
 
     }
