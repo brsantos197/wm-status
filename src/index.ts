@@ -18,6 +18,9 @@ if (require('electron-squirrel-startup')) {
 
 let whatsappClient: Client
 let whatsAppReady = false
+let mainWindow: BrowserWindow
+let wwebWindow: BrowserWindow
+
 const lostMessages: { contact: string, message: string }[] = []
 const appIconPath = nativeImage.createFromPath(resolve(__dirname, 'app_icon.png')).resize({ width: 16, height: 16 })
 const closeIconPath = nativeImage.createFromPath(resolve(__dirname, 'close_icon.png')).resize({ width: 16, height: 16 })
@@ -50,198 +53,195 @@ pie.initialize(app)
       const browser = await pie.connect(app, puppeteer);
       return { browser, window }
     }
-
     const main = async () => {
-      let mainWindow: BrowserWindow
-      let wwebWindow: BrowserWindow
       let needRefresh = true
 
-      const gotTheLock = app.requestSingleInstanceLock()
+      try {
+        mainWindow = await createMainWindow()
 
-      if (!gotTheLock) {
-        app.quit()
-      } else {
-        try {
-          mainWindow = await createMainWindow()
+        mainWindow.once('ready-to-show', async () => {
+          console.log('MAIN WINDOW READY');
+          const { browser, window } = await createWWebWindow()
+          wwebWindow = window
 
-          mainWindow.once('ready-to-show', async () => {
-            console.log('MAIN WINDOW READY');
-            const { browser, window } = await createWWebWindow()
-            wwebWindow = window
-
-            if (process.platform === 'win32') {
-              const tray = new Tray(appIconPath)
-              tray.on('click', () => {
-                mainWindow.show()
-              })
-              const contextMenu = Menu.buildFromTemplate([
-                {
-                  label: 'Sair', icon: closeIconPath, click: () => {
-                    mainWindow.removeAllListeners()
-                    app.quit()
-                  }
+          if (process.platform === 'win32') {
+            const tray = new Tray(appIconPath)
+            tray.on('click', () => {
+              mainWindow.show()
+            })
+            const contextMenu = Menu.buildFromTemplate([
+              {
+                label: 'Sair', icon: closeIconPath, click: () => {
+                  mainWindow.removeAllListeners()
+                  app.quit()
                 }
-              ])
-              tray.setToolTip('WM Status App')
-              const ballon = {
-                title: 'Segundo Plano',
-                content: 'Rodando em segundo plano',
-                icon: appIconPath
               }
-              tray.setContextMenu(contextMenu)
-              mainWindow.on('close', (e) => {
-                e.preventDefault()
-                mainWindow.hide()
-              })
-              mainWindow.on('minimize', (e: Electron.Event) => {
-                e.preventDefault()
-                mainWindow.hide()
-              })
-              mainWindow.once('hide', () => {
-                tray.displayBalloon(ballon)
-              })
-            } else {
-              mainWindow.on('close', () => {
-                wwebWindow.close()
-              })
+            ])
+            tray.setToolTip('WM Status App')
+            const ballon = {
+              title: 'Segundo Plano',
+              content: 'Rodando em segundo plano',
+              icon: appIconPath
             }
+            tray.setContextMenu(contextMenu)
+            mainWindow.on('close', (e) => {
+              e.preventDefault()
+              mainWindow.hide()
+            })
+            mainWindow.on('minimize', (e: Electron.Event) => {
+              e.preventDefault()
+              mainWindow.hide()
+            })
+            mainWindow.once('hide', () => {
+              tray.displayBalloon(ballon)
+            })
+          } else {
+            mainWindow.on('close', () => {
+              wwebWindow.close()
+            })
+          }
 
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            whatsappClient = new Client(browser, wwebWindow);
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          whatsappClient = new Client(browser, wwebWindow);
 
-            whatsappClient.on('qr', (qr: string) => {
-              needRefresh = false
-              mainWindow.webContents.send('onqrcode', qr)
-            });
+          whatsappClient.on('qr', (qr: string) => {
+            needRefresh = false
+            mainWindow.webContents.send('onqrcode', qr)
+          });
 
-            whatsappClient.on('ready', async () => {
-              needRefresh = false
-              whatsAppReady = true
-              console.log('Client is ready!');
-              if (!mainWindow.isFocused()) {
-                new Notification({
-                  title: 'WM Status',
-                  body: 'WhatsApp conectado!'
-                }).show()
-              }
-              while (lostMessages.length) {
-                await whatsappClient.sendMessage(`${lostMessages[0].contact}@c.us`, lostMessages[0].message)
-                lostMessages.shift()
-              }
-              mainWindow.webContents.send('onconnected', true)
-            });
-
-            whatsappClient.on('disconnected', () => {
-              console.log('Client is disconnected!');
+          whatsappClient.on('ready', async () => {
+            needRefresh = false
+            whatsAppReady = true
+            console.log('Client is ready!');
+            if (!mainWindow.isFocused()) {
               new Notification({
                 title: 'WM Status',
-                body: 'WhatsApp desconectado!'
+                body: 'WhatsApp conectado!'
               }).show()
-              mainWindow.webContents.send('ondisconnected', true)
-            });
-
-            whatsappClient.on('loading_screen', (percent, message) => {
-              needRefresh = false
-              console.log(percent, message);
-              mainWindow.webContents.send('onloading', { percent, message })
-            })
-
-            whatsappClient.on('auth_failure', (message) => {
-              mainWindow.webContents.send('error', message)
-            })
-
-            let counter = 15
-            const interval = setInterval(() => {
-              if (needRefresh) {
-                wwebWindow.webContents.reloadIgnoringCache()
-                counter += 5
-              } else {
-                clearInterval(interval)
-              }
-            }, counter * 1000);
-
-            try {
-              await whatsappClient.initialize();
-            } catch (error) {
-              console.error('AQUI ===>', error);
             }
+            while (lostMessages.length) {
+              await whatsappClient.sendMessage(`${lostMessages[0].contact}@c.us`, lostMessages[0].message)
+              lostMessages.shift()
+            }
+            mainWindow.webContents.send('onconnected', true)
+          });
+
+          whatsappClient.on('disconnected', () => {
+            console.log('Client is disconnected!');
+            new Notification({
+              title: 'WM Status',
+              body: 'WhatsApp desconectado!'
+            }).show()
+            mainWindow.webContents.send('ondisconnected', true)
+          });
+
+          whatsappClient.on('loading_screen', (percent, message) => {
+            needRefresh = false
+            console.log(percent, message);
+            mainWindow.webContents.send('onloading', { percent, message })
           })
-        } catch (error) {
-          mainWindow.webContents.send('error', error)
-          console.error(error);
-          throw error
-        }
 
-        globalShortcut.register('F12', () => {
-          mainWindow.webContents.toggleDevTools()
-        })
+          whatsappClient.on('auth_failure', (message) => {
+            mainWindow.webContents.send('error', message)
+          })
 
-        if (isDev && process.platform === 'win32') {
-          // Set the path of electron.exe and your app.
-          // These two additional parameters are only available on windows.
-          // Setting this is required to get this working in dev mode.
-          app.setAsDefaultProtocolClient('wmstatus-dev', process.execPath, [resolve(process.argv[1]), '']);
-        } else {
-          app.setAsDefaultProtocolClient('wmstatus');
-        }
-
-        app.on('second-instance', async (event, commandLine) => {
-          // Someone tried to run a second instance, we should focus our window.
-          dialog.showErrorBox('caiu aqui!', commandLine[commandLine.length - 1])
-
-          const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
-          mainWindow.webContents.send('log', 'SECONDE INSTANCE')
-
-          if (mainWindow) {
-            if (mainWindow.isMinimized()) mainWindow.restore()
-            try {
-              if (whatsAppReady) {
-                await whatsappClient.sendMessage(`${contact}@c.us`, message)
-              } else {
-                mainWindow.webContents.send('warn', 'LOSTMESSAGES')
-                lostMessages.push({ contact, message })
-              }
-            } catch (error) {
-              dialog.showErrorBox('Ops!', error)
+          let counter = 15
+          const interval = setInterval(() => {
+            if (needRefresh) {
+              wwebWindow.webContents.reloadIgnoringCache()
+              counter += 5
+            } else {
+              clearInterval(interval)
             }
-          } else {
-            lostMessages.push({ contact, message })
-          }
-          // the commandLine is array of strings in which last element is deep link url
-          // the url str ends with /
-        })
+          }, counter * 1000);
 
-        app.on('open-url', async (event, url) => {
-          dialog.showErrorBox('caiu aqui!', url)
-          const { contact, message } = decodeMessage(url)
+          try {
+            await whatsappClient.initialize();
+          } catch (error) {
+            console.error('AQUI ===>', error);
+          }
+        })
+      } catch (error) {
+        mainWindow.webContents.send('error', error)
+        console.error(error);
+        throw error
+      }
+      globalShortcut.register('F12', () => {
+        mainWindow.webContents.toggleDevTools()
+      })
+    }
+
+    if (isDev && process.platform === 'win32') {
+      // Set the path of electron.exe and your app.
+      // These two additional parameters are only available on windows.
+      // Setting this is required to get this working in dev mode.
+      app.setAsDefaultProtocolClient('wmstatus-dev', process.execPath, [resolve(process.argv[1]), '']);
+    } else {
+      app.setAsDefaultProtocolClient('wmstatus');
+    }
+
+    const gotTheLock = app.requestSingleInstanceLock()
+
+    if (!gotTheLock) {
+      app.quit()
+    } else {
+      app.on('second-instance', async (event, commandLine) => {
+        // Someone tried to run a second instance, we should focus our window.
+        dialog.showErrorBox('second-instance!', commandLine[commandLine.length - 1])
+
+        const { contact, message } = decodeMessage(commandLine[commandLine.length - 1])
+        mainWindow.webContents.send('log', 'SECONDE INSTANCE')
+
+        if (mainWindow) {
+          if (mainWindow.isMinimized()) mainWindow.restore()
           try {
             if (whatsAppReady) {
               await whatsappClient.sendMessage(`${contact}@c.us`, message)
             } else {
+              mainWindow.webContents.send('warn', 'LOSTMESSAGES')
               lostMessages.push({ contact, message })
             }
           } catch (error) {
             dialog.showErrorBox('Ops!', error)
           }
-        });
-      }
+        } else {
+          lostMessages.push({ contact, message })
+        }
+        // the commandLine is array of strings in which last element is deep link url
+        // the url str ends with /
+      })
 
+      app.on('open-url', async (event, url) => {
+        dialog.showErrorBox('open-url', url)
+        const { contact, message } = decodeMessage(url)
+        try {
+          if (whatsAppReady) {
+            await whatsappClient.sendMessage(`${contact}@c.us`, message)
+          } else {
+            lostMessages.push({ contact, message })
+          }
+        } catch (error) {
+          dialog.showErrorBox('Ops!', error)
+        }
+      });
+
+      app.on('ready', main);
+
+      app.on('window-all-closed', () => {
+        if (process.platform !== 'darwin') {
+          app.quit();
+        }
+      });
+
+      app.on('activate', async () => {
+        // On OS X it's common to re-create a window in the app when the
+        // dock icon is clicked and there are no other windows open.
+        if (BrowserWindow.getAllWindows().length === 0) {
+          await main();
+        }
+      });
     }
-    app.on('ready', main);
 
-    app.on('window-all-closed', () => {
-      if (process.platform !== 'darwin') {
-        app.quit();
-      }
-    });
-
-    app.on('activate', async () => {
-      // On OS X it's common to re-create a window in the app when the
-      // dock icon is clicked and there are no other windows open.
-      if (BrowserWindow.getAllWindows().length === 0) {
-        await main();
-      }
-    });
   })
   .catch(err => console.error(err))
