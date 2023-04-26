@@ -8,7 +8,7 @@ rules.push({
   use: {
     loader: 'file-loader',
     options: {
-      name: '[name].[ext]',
+      name: 'images/[name].[ext]',
     }
   }
 });
@@ -18,7 +18,15 @@ export const mainConfig: Configuration = {
    * This is the main entry point for your application, it's the first file
    * that runs in the main process.
    */
-  entry: ['./src/index.ts', './src/app_icon.png', './src/close_icon.png', './src/app_icon.ico', './src/install_icon.ico'],
+  entry: [
+    './src/index.ts',
+    './src/images/app_icon.png',
+    './src/images/app_icon.ico',
+    './src/images/app_icon_fill.png',
+    './src/images/app_icon_fill.ico',
+    './src/images/close_icon.png',
+    './src/images/install_icon.ico'
+  ],
   plugins,
   // Put your normal webpack config below here
   module: {

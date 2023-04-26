@@ -22,8 +22,8 @@ let mainWindow: BrowserWindow
 let wwebWindow: BrowserWindow
 
 const lostMessages: { contact: string, message: string }[] = []
-const appIconPath = nativeImage.createFromPath(resolve(__dirname, 'app_icon.png'))
-const closeIconPath = nativeImage.createFromPath(resolve(__dirname, 'close_icon.png')).resize({ width: 16, height: 16 })
+const appIconPath = nativeImage.createFromPath(resolve(__dirname, 'images/app_icon_fill.png'))
+const closeIconPath = nativeImage.createFromPath(resolve(__dirname, 'images/close_icon.png')).resize({ width: 16, height: 16 })
 
 pie.initialize(app)
   .then(() => {
