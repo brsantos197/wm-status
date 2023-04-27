@@ -15,7 +15,7 @@ interface WhatsAppProps {
 
 export const WhatsApp = ({ qrcode, ready, loading, disconnected }: WhatsAppProps) => {
   return (
-    <div className="h-screen bg-zinc-50 text-center flex flex-col justify-center items-center gap-4">
+    <div className="h-screen bg-zinc-950 text-center flex flex-col justify-center items-center gap-4">
       {
         !ready ? (
           <>
