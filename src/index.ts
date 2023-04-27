@@ -21,24 +21,16 @@ autoUpdater.setFeedURL({ url })
 autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
   const dialogOpts = {
     type: 'info',
-    buttons: ['Restart', 'Later'],
-    title: 'Application Update',
+    buttons: ['Reiniciar e atualizar', 'Mais tarde'],
+    title: 'Atualização disponível!',
     message: process.platform === 'win32' ? releaseNotes : releaseName,
     detail:
-      'A new version has been downloaded. Restart the application to apply the updates.',
+      'Uma nova versão foi baixada. Reinicie o aplicativo para aplicar as atualizações.',
   }
 
   dialog.showMessageBox(dialogOpts).then((returnValue) => {
     if (returnValue.response === 0) autoUpdater.quitAndInstall()
   })
-})
-
-autoUpdater.on('checking-for-update', () => {
-  dialog.showErrorBox('Buscando', '...')
-})
-
-autoUpdater.on('update-available', () => {
-  dialog.showErrorBox('Opa', 'Nova atualizaçao...')
 })
 
 autoUpdater.on('error', (message) => {
