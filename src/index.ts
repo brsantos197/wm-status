@@ -16,6 +16,8 @@ declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 const server = 'https://wm-status.vercel.app'
 const url = `${server}/update/${process.platform}/${app.getVersion()}`
 
+console.log(url);
+
 autoUpdater.setFeedURL({ url })
 
 autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
