@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, globalShortcut, Menu, nativeImage, Notification, Tray } from 'electron';
+import { app, autoUpdater, BrowserWindow, dialog, globalShortcut, Menu, nativeImage, Notification, Tray } from 'electron';
 import { Client } from 'wwebjs-electron';
 import pie from "puppeteer-in-electron";
 import isDev from 'electron-is-dev'
@@ -10,6 +10,38 @@ import { resolve } from "path";
 // whether you're running in development or production).
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+
+// Auto update
+
+const server = 'https://wm-status.vercel.app'
+const url = `${server}/update/${process.platform}/${app.getVersion()}`
+
+autoUpdater.setFeedURL({ url })
+
+autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+  const dialogOpts = {
+    type: 'info',
+    buttons: ['Restart', 'Later'],
+    title: 'Application Update',
+    message: process.platform === 'win32' ? releaseNotes : releaseName,
+    detail:
+      'A new version has been downloaded. Restart the application to apply the updates.',
+  }
+
+  dialog.showMessageBox(dialogOpts).then((returnValue) => {
+    if (returnValue.response === 0) autoUpdater.quitAndInstall()
+  })
+})
+
+autoUpdater.on('error', (message) => {
+  dialog.showErrorBox('deu ruim', String(message))
+  console.error('There was a problem updating the application')
+  console.error(message)
+})
+
+setInterval(() => {
+  autoUpdater.checkForUpdates()
+}, 1000 * 60)
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {

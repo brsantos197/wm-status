@@ -1,6 +1,6 @@
 {
-  "name": "wm-status",
-  "productName": "wm-status",
+  "name": "wmstatus",
+  "productName": "WM Status",
   "version": "1.0.0",
   "description": "App para envio de mensagem de status",
   "main": ".webpack/main",
