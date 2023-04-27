@@ -34,6 +34,14 @@ autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
   })
 })
 
+autoUpdater.on('checking-for-update', () => {
+  dialog.showErrorBox('Procurando', 'Buscando...')
+})
+
+autoUpdater.on('update-available', () => {
+  dialog.showErrorBox('Opa', 'Nova atualização')
+})
+
 autoUpdater.on('error', (message) => {
   dialog.showErrorBox('deu ruim', String(message))
   console.error('There was a problem updating the application')
